@@ -90,9 +90,7 @@ As you write your code that edits the data frame, consider printing the head of 
 ```{r}
 # Try creating a distance column in your data frame here:
 # First install (in console) geosphere package and load into the workspace
-short_trips <- short_trips %>%
-              mutate(distance=distHaversine(c(start.station.longitude, start.station.latitude),c(end.station.longitude,end.station.latitude))
-short_trips
+
 ```
 
 There are many different strategies to calculate the distance between two points. The simplest way to do this would be to find the length of the straight line between the two points. This is a massive assumption to make &mdash; it would be remarkable if any of these bike trips traveled in a straight line between the two points without making any turns or curves.
@@ -109,8 +107,13 @@ If you get stuck, use `?distHaversine` to check the documentation to see more ex
 
 ```{r}
 # Use the geosphere library to create a distance column
-
-
+starting_stations <- short_trips %>%
+                    select(start.station.latitude,start.station.longitude)
+ending_stations <- short_trips %>%
+                    select(end.station.latitude,end.station.longitude)
+short_trips <- short_trips %>%
+               mutate(distance=distHaversine(starting_stations,ending_stations))
+short_trips
 ```
 
 ### Modifying the Data Frame: Speed
@@ -119,8 +122,9 @@ Now that we've made a column containing the distance of each trip, let's make an
 
 ```{r}
 # Create the speed column
-
-
+short_trips <- short_trips %>%
+              mutate(speed=distance/tripduration)
+short_trips
 ```
 
 ### Modifying the Data Frame: Average Speed by Age
@@ -134,8 +138,10 @@ Then pipe the result of that function into the `summarize()` function. `summariz
 
 ```{r}
 # Use group_by() and summarize() to get the mean speed of each age
-
-
+average_speed_by_age <- short_trips %>%
+                      group_by(age) %>%
+                      summarize(mean_speed=mean(speed, na.rm = TRUE))
+average_speed_by_age
 ```
 
 ### Visualization!
