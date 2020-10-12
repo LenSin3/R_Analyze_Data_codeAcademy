@@ -150,21 +150,31 @@ We made it! We now have the average speed of every age in our dataset. Let's use
 
 ```{r}
 # Install and load ggplot2 to create a line graph of age and mean speed
-
+avg_Spd_Lingrph <- ggplot(average_speed_by_age, aes(x=age,y=mean_speed)) +
+                    geom_line(aes(x=age,y=mean_speed))
+avg_Spd_Lingrph
 ```
 
 Nice work! Our intuition seems to be right &mdash; there's a steady drop in speed until we hit some outliers. It would be pretty surprising to see someone over the age of 100 using a bike share program! Let's filter the data to only show ages less than 80 and redraw our visualization.
 
 ```{r}
 # Filter the data frame to only contain rows where the age is less than 80
-
+age_80 <- average_speed_by_age %>%
+          filter(age<80)
+age_80
+avg_Spd_Lingrph_80 <- ggplot(age_80) +
+                    geom_line(aes(x=age,y=mean_speed))
+avg_Spd_Lingrph_80
 ```
 
 That looks a bit better! Let's do some work to make our graph look a bit more professional. Add a title and axis labels. We also centered our title!
 
 ```{r}
 # Add a title and label the axes
-
+avg_Spd_Lingrph_80 <- avg_Spd_Lingrph_80 +
+                    labs(title = "Average Speed of riders below 80 years",
+                         x="Age of Riders", y="Average Speed of Riders")
+avg_Spd_Lingrph_80
 ```
 
 ### Filtering By Gender
