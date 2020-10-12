@@ -1,6 +1,8 @@
 ---
 title: "Explore Citi Bike Data"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ### Citi Bike Data
