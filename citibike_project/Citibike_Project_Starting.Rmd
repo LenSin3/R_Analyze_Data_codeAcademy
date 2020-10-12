@@ -41,9 +41,13 @@ Make sure to install and load `ggplot2` and `dplyr`!
 
 ```{r}
 # Install and load ggplot2 and dplyr
-
+library(dplyr)
+library(ggplot2)
 # Create a heatmap
-
+ht_map <- ggplot(all_data, aes(x=start.station.latitude, y=start.station.longitude)) +
+geom_bin2d() +
+  stat_bin_2d(binwidth = 0.001)
+ht_map
 ```
 
 
@@ -61,14 +65,18 @@ Since this dataset is so big, we recommend using the `filter()` function to grab
 
 ```{r}
 # Create a subset of the data
-
+short_trips <- all_data %>%
+               filter(tripduration < 900)
+short_trips
 ```
 
 Next, let's add a column called `age` to the data frame. `age` should be 2020 minus `birth.year` (this data was collected in 2020). Use the `mutate()` function to do this. After calling mutate, make sure to save the result in a variable. We should save the result back to `short_trips`.
 
 ```{r}
 # Add the age column
-
+short_trips <- short_trips %>%
+              mutate(age=2020 - birth.year)
+short_trips
 ```
 
 ### Modifying the Data Frame: Distance
