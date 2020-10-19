@@ -17,13 +17,14 @@ When you first downloaded R to your computer, you also downloaded several datase
 
 ```{r}
 # Load datasets and look at its documentation
-
+library(datasets)
+?datasets
 ```
 
 That documentation didn't tell us much &mdash; but it did give us a hint on where to go to find a complete list of the datasets. Call the line of code recommended in the documentation of `datasets`. Note that this will open a new tab in RStudio. Make sure to come back to this tab after looking through the datasets.
 
 ```{r}
-
+library(help = "datasets")
 ```
 
 You should see a list of datasets. The documentation gives us a brief description on the datasets, but it's still a bit tough to understand what the data actually looks like. You can access a dataset in R using the notation `datasets::dataset_name`. For example, take a look at the head of the dataset named `ToothGrowth` using the line `head(datasets::ToothGrowth)`. What columns exist? You can also simply use `ToothGrowth` to access the dataset &mdash; you don't need to include the name of the package that it came from.
@@ -32,7 +33,7 @@ Finally, you can pull up the documentation for the data using `?ToothGrowth`. Wh
 
 ```{r}
 # Print the head of the ToothGrowth dataset
-
+head(datasets::Theoph)
 ```
 
 Great! We now have the tools to explore all of the datasets that come with R. Let's now think about which ones might be useful for linear regression. With linear regression, we're looking for a dataset where one column might be explained by another (or in the case of multiple linear regression, one column being explained by multiple other columns).
@@ -41,7 +42,7 @@ Try to find at least 3 different datasets that might be good candidates for line
 
 ```{r}
 # Find at least three datasets that seem like good candidates for linear regression
-
+?Theoph
 ```
 
 ### Confirming Data Assumptions
@@ -58,9 +59,15 @@ Finally, we created a graph using the `pressure` dataset. This dataset descibes 
 
 ```{r}
 # Load the ggplot2 package
-
+library(ggplot2)
 # Plot your datasets
-
+cars_plot <- ggplot(cars, aes(speed, dist)) + geom_point()
+cars_plot
+state.x77 <- as.data.frame(state.x77)
+state.x77_plot <- ggplot(state.x77, aes(Illiteracy, Income)) + geom_point()
+state.x77_plot
+pressure_plot <- ggplot(pressure, aes(temperature, pressure)) + geom_point()
+pressure_plot
 ```
 
 That third graph certainly didn't look linear. This looks to be a quadratic or exponential relationship &mdash; linear regression wouldn't be appropriate.
@@ -71,21 +78,29 @@ Was there a stronger correlation between the speed and stopping distance in the 
 
 ```{r}
 # Find the correlation coefficient
-
+cars_cor <- cor.test(cars$speed, cars$dist)
+cars_cor
+state_cor <- cor.test(state.x77$Illiteracy, state.x77$Income)
+state_cor
 ```
 
 Finally, let's check for outliers in the dataset to see if anything looks particularly off. For the `cars` dataset, create a boxplot showing the distribuition of the `speed` variable. For the `state.x77` dataset, create a boxplot showing the distribution of the `Illiteracy` dataset. Again, remember that the `state.x77` dataset first has to be put into a data frame using `as.data.frame()`. You can store this data frame version of the data in a variable if you'd like.
 
 ```{r}
 # Create a box plot of your datasets.
-
+cars_speed_box <- ggplot(cars, aes(speed,speed)) + geom_boxplot()
+cars_speed_box
+state_illiteracy_box <- ggplot(state.x77, aes(Illiteracy,Illiteracy)) +
+  geom_boxplot()
+state_illiteracy_box
 ```
 
 While we're looking at the cars and states datasets, we encourage you to experiment with other datasets as well! Use this space to explore assumptions of linear regression for datasets from the `datasets` package that you're interested.
 
 ```{r}
 # Explore other datasets here
-
+theop_plot <- ggplot(Theoph, aes(Dose,conc)) + geom_point()
+theop_plot
 ```
 
 
@@ -100,7 +115,15 @@ Before creating our models, let's randomly split our data into training and test
 set.seed(123)
 
 #Split your data into training and test sets
+# Split cars
+cars_sample <- sample(c(TRUE,FALSE), nrow(cars), replace = T, prob=c(0.6,0.4))
+cars_train <- cars[cars_sample, ]
+cars_test <- cars[!cars_sample, ]
 
+# Split state.x77
+state_sample <- sample(c(TRUE,FALSE), nrow(state.x77), replace = T, prob=c(0.6,0.4))
+state_train <- state.x77[state_sample, ]
+state_test <- state.x77[!state_sample, ]
 ```
 
 We can now make our linear regression models using the trainings set!
@@ -108,14 +131,22 @@ Create a linear regression model using the `cars` dataset that predicts `dist` b
 
 ```{r}
 # Create your linear regression models
+# Model for cars
+model_cars <- lm(dist ~ speed, data = cars_train)
 
+# Model for states
+model_state <- lm(Income ~ Illiteracy, data = state_train)
 ```
 
 Let's now look at the RSE of each model using `sigma()`. What do these number mean? Remember, the units of RSE are specific to each dataset. Write your answer as a comment in your code block.
 
 ```{r}
 # Find the RSE of each model
+# RSE cars
+sigma(model_cars)
 
+# RSE state.x77
+sigma(model_state)
 ```
 
 This means that the true distance it takes a car to stop will be `15.35` feet off from what the model predicted, on average. Similarly, the model's prediction for average income was off by `627.61` dollars on average. 
@@ -126,7 +157,11 @@ Try to articulate what these values mean as a comment in your code. We'll discus
 
 ```{r}
 # Find the R Squared value of each model
+# R-squared for model_cars
+summary(model_cars)$r.squared
 
+# R-squared for model_state
+summary(model_state)$r.squared
 ```
 
 The R Squared value measures the proportion of variance explained. In other words, 71% of the variance found in the car's stopping distance can be explained by the speed of the car. On the other hand, only 20% of the variance in a state's income can be explained by the state's illiteracy level.
@@ -135,7 +170,11 @@ Finally, let's look at the rest of `summary()` for each model. This time, focus 
 
 ```{r}
 # Print the summary of each model
+# Summary for model_cars
+summary(model_cars)
 
+# Summary for model_state
+summary(model_state)
 ```
 
 Just like with the R Squared value, these values are showing that the `speed` variable in the cars dataset might be a better fit linear regression than the `Illiteracy` variable in the state dataset. The easiest way to see this is to look at the stars by each coefficient. For the car dataset, the `speed` coefficient has three stars, meaning the p-value is less than `0.001`. This means that if there was truly no relationship between `speed` and `dist`, we would expect to see data like this from about 1 out of 1000 random samples.
