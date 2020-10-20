@@ -18,7 +18,7 @@ When you first downloaded R to your computer, you also downloaded several datase
 ```{r}
 # Load datasets and look at its documentation
 library(datasets)
-?datasets
+library(dplyr)
 ```
 
 That documentation didn't tell us much &mdash; but it did give us a hint on where to go to find a complete list of the datasets. Call the line of code recommended in the documentation of `datasets`. Note that this will open a new tab in RStudio. Make sure to come back to this tab after looking through the datasets.
@@ -88,9 +88,9 @@ Finally, let's check for outliers in the dataset to see if anything looks partic
 
 ```{r}
 # Create a box plot of your datasets.
-cars_speed_box <- ggplot(cars, aes(speed,speed)) + geom_boxplot()
+cars_speed_box <- ggplot(cars, aes(speed)) + geom_boxplot()
 cars_speed_box
-state_illiteracy_box <- ggplot(state.x77, aes(Illiteracy,Illiteracy)) +
+state_illiteracy_box <- ggplot(state.x77, aes(Illiteracy)) +
   geom_boxplot()
 state_illiteracy_box
 ```
@@ -198,11 +198,43 @@ We also included segments to connect each residual to their corresponding estima
 
 ```{r}
 #save predicted and residual values to df
-
+cars_train$estimate <- predict(model_cars)   
+cars_train$residuals <- residuals(model_cars)
 
 #create visualization
+ggplot(cars_train, aes(speed, dist)) +
+geom_point() + #plot actual values
+geom_point(aes(y = estimate), color = "blue") +
+geom_segment(aes(xend = speed, yend = estimate), color = "gray")
+
+#save predicted and residual values to df
+state_train$estimate <- predict(model_state)   
+state_train$residuals <- residuals(model_state)
+
+#create visualization
+ggplot(state_train, aes(Illiteracy, Income)) +
+geom_point() + #plot actual values
+geom_point(aes(y = estimate), color = "blue") +
+geom_segment(aes(xend = Illiteracy, yend = estimate), color = "gray")
+```
 
 
+```{r}
+ggplot(cars_train, aes(speed, dist)) + 
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  geom_smooth(se = FALSE, color = 'red')
+ggplot(state_train, aes(Illiteracy, Income)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  geom_smooth(se = FALSE, color = 'red')
+```
+
+
+```{r}
+model_state_2 <- lm(Income ~ Illiteracy + `HS Grad`, data = state_train)
+summary(model_state_2)
+```
 ```
 
 Let's also add a visualization of the model and LOESS smoother to our scatter point. Grab your code for your original scatterplot, but make sure to use your training set rather then the original dataset. Then add `geom_smooth(method = "lm")` to visualize the model and `geom_smooth(se = FALSE, color = "red")` to add a LOESS smoother.
@@ -210,7 +242,6 @@ Let's also add a visualization of the model and LOESS smoother to our scatter po
 Do these visualizations confirm what you saw when calculating the R Squared value of each model?
 
 ```{r}
-# Add a LOESS smoother to your scatterplot
 
 ```
 
@@ -230,6 +261,9 @@ Again, try to write a few sentences as a comment describing the summary of your 
 
 ```{r}
 # Create a multiple linear regression model
+
+```
+```{r}
 
 ```
 
